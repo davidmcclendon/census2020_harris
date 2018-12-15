@@ -453,13 +453,45 @@ pal <- colorFactor(c("#094d8c",  "#2A92F2", "#ffd6af", "#ffaa5a","#FF7F05", "#af
 
 
 #Popup box
-popup<-paste0("<b>Block Group</b>: #", mapdf@data$GEOID, "<br/>",
-              "<b>Low Response Rate</b>: ", mapdf@data$Low_Response_Score, "%<br/>",
-              "<b>% Renters</b>: ",  round(mapdf@data$X..Renting*100), "%<br/>",
-              "<b>% HH with children <6</b>: ", round(mapdf@data$X..HH.with.child.under.6*100), "%<br/>",
-              "<b>% Hispanic</b>: ", round(mapdf@data$X..Hispanic*100), "%<br/>",
-              "<b>% Black</b>: ", round(mapdf@data$X..Black*100), "%"
-              )
+popup_all <-paste0("<b>Block Group</b>: #", mapdf@data$GEOID, "<br/>",
+                   "<b>Low Response Rate</b>: ", mapdf@data$Low_Response_Score, "%<br/>",
+                   "<b>% Renters</b>: ",  round(mapdf@data$X..Renting*100), "%<br/>",
+                   "<b>% HH with children <6</b>: ", round(mapdf@data$X..HH.with.child.under.6*100), "%<br/>",
+                   "<b>% Hispanic</b>: ", round(mapdf@data$X..Hispanic*100), "%<br/>",
+                   "<b>% Black</b>: ", round(mapdf@data$X..Black*100), "%"
+)
+
+popup_rental <-paste0("<b>Block Group</b>: #", rental@data$GEOID, "<br/>",
+                      "<b>Low Response Rate</b>: ", rental@data$Low_Response_Score, "%<br/>",
+                      "<b>% Renters</b>: ",  round(rental@data$X..Renting*100), "%<br/>",
+                      "<b>% HH with children <6</b>: ", round(rental@data$X..HH.with.child.under.6*100), "%<br/>",
+                      "<b>% Hispanic</b>: ", round(rental@data$X..Hispanic*100), "%<br/>",
+                      "<b>% Black</b>: ", round(rental@data$X..Black*100), "%"
+)
+
+popup_kids <-paste0("<b>Block Group</b>: #", kids@data$GEOID, "<br/>",
+                    "<b>Low Response Rate</b>: ", kids@data$Low_Response_Score, "%<br/>",
+                    "<b>% Renters</b>: ",  round(kids@data$X..Renting*100), "%<br/>",
+                    "<b>% HH with children <6</b>: ", round(kids@data$X..HH.with.child.under.6*100), "%<br/>",
+                    "<b>% Hispanic</b>: ", round(kids@data$X..Hispanic*100), "%<br/>",
+                    "<b>% Black</b>: ", round(kids@data$X..Black*100), "%"
+)
+
+popup_hisp <-paste0("<b>Block Group</b>: #", hispanic@data$GEOID, "<br/>",
+                    "<b>Low Response Rate</b>: ", hispanic@data$Low_Response_Score, "%<br/>",
+                    "<b>% Renters</b>: ",  round(hispanic@data$X..Renting*100), "%<br/>",
+                    "<b>% HH with children <6</b>: ", round(hispanic@data$X..HH.with.child.under.6*100), "%<br/>",
+                    "<b>% Hispanic</b>: ", round(hispanic@data$X..Hispanic*100), "%<br/>",
+                    "<b>% Black</b>: ", round(hispanic@data$X..Black*100), "%"
+)
+
+popup_black <-paste0("<b>Block Group</b>: #", black@data$GEOID, "<br/>",
+                     "<b>Low Response Rate</b>: ", black@data$Low_Response_Score, "%<br/>",
+                     "<b>% Renters</b>: ",  round(black@data$X..Renting*100), "%<br/>",
+                     "<b>% HH with children <6</b>: ", round(black@data$X..HH.with.child.under.6*100), "%<br/>",
+                     "<b>% Hispanic</b>: ", round(black@data$X..Hispanic*100), "%<br/>",
+                     "<b>% Black</b>: ", round(black@data$X..Black*100), "%"
+)
 
 popup2 <- paste0("<b>Tract</b>: #", tract_sp@data$GEOID, "<br/>",
                  "<b>Low Response Rate</b>: ", tract_sp@data$Low_Response_Score, "%<br/>",
@@ -472,7 +504,7 @@ map <- leaflet() %>%
     group = "All block groups",
     data = mapdf ,
     fillColor = ~pal(mapdf@data$lrs.bins),
-    popup = popup,
+    popup = popup_all,
     weight = 0.5,
     opacity = 1,
     color = 'white',
@@ -482,7 +514,7 @@ map <- leaflet() %>%
     group = "High % Rentals",
     data = rental,
     fillColor = ~pal(rental@data$lrs.bins),
-    popup = popup,
+    popup = popup_rental,
     weight = 0.5,
     opacity = 1,
     color = 'white',
@@ -493,7 +525,7 @@ map <- leaflet() %>%
     group = "High % HH kids <6",
     data = kids,
     fillColor = ~pal(kids@data$lrs.bins),
-    popup = popup,
+    popup = popup_kids,
     weight = 0.5,
     opacity = 1,
     color = 'white',
@@ -504,7 +536,7 @@ map <- leaflet() %>%
     group = "High % Hispanic",
     data = hispanic,
     fillColor = ~pal(hispanic@data$lrs.bins),
-    popup = popup,
+    popup = popup_hisp,
     weight = 0.5,
     opacity = 1,
     color = 'white',
@@ -515,7 +547,7 @@ map <- leaflet() %>%
     group = "High % Black",
     data = black,
     fillColor = ~pal(black@data$lrs.bins),
-    popup = popup,
+    popup = popup_black,
     weight = 0.5,
     opacity = 1,
     color = 'white',
@@ -546,6 +578,7 @@ map <- leaflet() %>%
     options = layersControlOptions(collapsed = FALSE)
   )
 
+
 map
 
 # Export Map #####
@@ -558,55 +591,4 @@ saveWidget(map, here("lowresponse_harris.html"))
 
 
 
-
-#Scatterplot: LR score vs. % block groups below avg (or below 60%?)
-
-what <- county %>%
-  filter(Tot_Population_ACS_12_16>=100000) %>% 
-  mutate(
-    county_fips = paste0(State, County),
-    harris01 = ifelse(State=="48" & County=="201", 1, 0)
-  ) %>% 
-  ggplot(aes(x = lr.score.wavg, y = Tot_Population_ACS_12_16, group = county_fips)) +
-  geom_point(aes(color = harris01, size = Tot_Population_ACS_12_16)) +
-  geom_smooth()
-
-what
-
-#Calculate percentages by county level
-#Compare Harris County to other big metro counties (top 10? 20?)
-  #On census mailback rates in 2010
-  #% of census tracts with low response rates (look at website def)
-  #Key predictors of low response rates nationwide (What's distrinct about Harris County?)
-
-
-
-# Renter occupied units  
-# Ages 18-24 
-# Female head 
-# Hispanic
-# NOT non-Hispanic White (reverse)
-# UNDER Age 65 (reverse)
-# Related child <6 
-# Non-married households (add, reverse)
-# Vacant units
-# Non-college graduates (reverse)
-# Median household income (add)
-# Persons per hh
-# Single person hh
-# Single-unit structures (reverse to multi-unit structures)
-# Below poverty
-# Under 18 (add)
-# Black
-# Not hs grad
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
 
